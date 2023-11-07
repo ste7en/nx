@@ -27,7 +27,7 @@ import { normalizePath } from './path';
 import { dirname, join } from 'path';
 import { getNxRequirePaths } from './installation-directory';
 import { readTsConfig } from '../plugins/js/utils/typescript';
-import { NxJsonConfiguration, PluginDefinition } from '../config/nx-json';
+import { NxJsonConfiguration, PluginConfiguration } from '../config/nx-json';
 
 import type * as ts from 'typescript';
 import { retrieveProjectConfigurationsWithoutPluginInference } from '../project-graph/utils/retrieve-workspace-files';
@@ -41,6 +41,7 @@ import {
 import { getNxPackageJsonWorkspacesPlugin } from '../../plugins/package-json-workspaces';
 import { CreateProjectJsonProjectsPlugin } from '../plugins/project-json/build-nodes/project-json';
 import { FileMapCache } from '../project-graph/nx-deps-cache';
+import { CreatePackageJsonProjectsNextToProjectJson } from '../plugins/project-json/build-nodes/package-json-next-to-project-json';
 
 /**
  * Context for {@link CreateNodesFunction}
@@ -194,14 +195,14 @@ function getPluginPathAndName(
 }
 
 export async function loadNxPluginAsync(
-  pluginDefinition: PluginDefinition,
+  pluginConfiguration: PluginConfiguration,
   paths: string[],
   root: string
 ): Promise<LoadedNxPlugin> {
   const { plugin: moduleName, options } =
-    typeof pluginDefinition === 'object'
-      ? pluginDefinition
-      : { plugin: pluginDefinition, options: undefined };
+    typeof pluginConfiguration === 'object'
+      ? pluginConfiguration
+      : { plugin: pluginConfiguration, options: undefined };
   let pluginModule = nxPluginCache.get(moduleName);
   if (pluginModule) {
     return { plugin: pluginModule, options };
@@ -217,14 +218,14 @@ export async function loadNxPluginAsync(
 }
 
 function loadNxPluginSync(
-  pluginDefinition: PluginDefinition,
+  pluginConfiguration: PluginConfiguration,
   paths: string[],
   root: string
 ): LoadedNxPlugin {
   const { plugin: moduleName, options } =
-    typeof pluginDefinition === 'object'
-      ? pluginDefinition
-      : { plugin: pluginDefinition, options: undefined };
+    typeof pluginConfiguration === 'object'
+      ? pluginConfiguration
+      : { plugin: pluginConfiguration, options: undefined };
   let pluginModule = nxPluginCache.get(moduleName);
   if (pluginModule) {
     return { plugin: pluginModule, options };
@@ -280,16 +281,11 @@ export function loadNxPluginsSync(
 }
 
 export async function loadNxPlugins(
-  plugins: PluginDefinition[],
+  plugins: PluginConfiguration[],
   paths = getNxRequirePaths(),
   root = workspaceRoot
 ): Promise<LoadedNxPlugin[]> {
   const result: LoadedNxPlugin[] = [...(await getDefaultPlugins(root))];
-
-  // TODO: These should be specified in nx.json
-  // Temporarily load js as if it were a plugin which is built into nx
-  // In the future, this will be optional and need to be specified in nx.json
-  result.push();
 
   plugins ??= [];
   for (const plugin of plugins) {
@@ -514,7 +510,10 @@ function readPluginMainFromProjectConfiguration(
 }
 
 async function getDefaultPlugins(root: string): Promise<LoadedNxPlugin[]> {
-  const plugins: NxPluginV2[] = [await import('../plugins/js')];
+  const plugins: NxPluginV2[] = [
+    CreatePackageJsonProjectsNextToProjectJson,
+    await import('../plugins/js'),
+  ];
 
   if (shouldMergeAngularProjects(root, false)) {
     plugins.push(

@@ -394,6 +394,29 @@ const nxCloudUrls = {
   '/nx-cloud/private-cloud/standalone': '/nx-cloud/private-cloud/ami-setup',
   '/nx-cloud/private-cloud/kubernetes-setup':
     '/nx-cloud/private-cloud/get-started',
+  '/recipes/ci': '/nx-cloud/recipes',
+  '/recipes/ci/ci-setup': '/nx-cloud/recipes/set-up/ci-setup',
+  '/recipes/ci/monorepo-ci-azure': '/nx-cloud/recipes/set-up/monorepo-ci-azure',
+  '/recipes/ci/monorepo-ci-circle-ci':
+    '/nx-cloud/recipes/set-up/monorepo-ci-circle-ci',
+  '/recipes/ci/monorepo-ci-github-action':
+    '/nx-cloud/recipes/set-up/monorepo-ci-github-action',
+  '/recipes/ci/monorepo-ci-jenkins':
+    '/nx-cloud/recipes/set-up/monorepo-ci-jenkins',
+  '/recipes/ci/monorepo-ci-gitlab':
+    '/nx-cloud/recipes/set-up/monorepo-ci-gitlab',
+  '/recipes/ci/monorepo-ci-bitbucket-pipelines':
+    '/nx-cloud/recipes/set-up/monorepo-ci-bitbucket-pipelines',
+  '/recipes/ci/ci-deployment': '/nx-cloud/recipes/other/ci-deployment',
+  '/nx-cloud/intro/what-is-nx-cloud': '/nx-cloud/intro/ci-with-nx',
+  '/nx-cloud/set-up': '/nx-cloud/recipes/set-up',
+  '/nx-cloud/set-up/record-commands': '/nx-cloud/recipes/other/record-commands',
+  '/nx-cloud/set-up/github':
+    '/nx-cloud/recipes/source-control-integration/github',
+  '/nx-cloud/set-up/bitbucket-cloud':
+    '/nx-cloud/recipes/source-control-integration/bitbucket-cloud',
+  '/nx-cloud/set-up/gitlab':
+    '/nx-cloud/recipes/source-control-integration/gitlab',
 };
 
 /**
@@ -661,7 +684,7 @@ const packagesDocuments = {
 };
 
 /**
- * Concept documents Updates (updated 2023-03-31)
+ * Concept documents Updates (updated 2023-10-18)
  */
 const conceptUrls = {
   '/concepts/more-concepts/global-nx':
@@ -674,6 +697,10 @@ const conceptUrls = {
     '/getting-started/tutorials/react-standalone-tutorial',
   '/getting-started/angular-standalone-tutorial':
     '/getting-started/tutorials/angular-standalone-tutorial',
+  '/concepts/more-concepts/micro-frontend-architecture':
+    '/concepts/module-federation/micro-frontend-architecture',
+  '/concepts/more-concepts/faster-builds-with-module-federation':
+    '/concepts/module-federation/faster-builds-with-module-federation',
 };
 
 const nested5minuteTutorialUrls = {
@@ -883,8 +910,22 @@ const latestRecipesRefactoring = {
   '/reference/commands': '/packages/nx',
 };
 
-const coreFeatureRefactoring = {
+const coreFeatureAndConceptsRefactoring = {
   '/core-features/share-your-cache': '/core-features/remote-cache',
+  '/concepts/more-concepts/customizing-inputs':
+    '/recipes/running-tasks/customizing-inputs',
+  '/recipes/tips-n-tricks/root-level-scripts':
+    '/recipes/running-tasks/root-level-scripts',
+  '/recipes/tips-n-tricks/run-commands-executor':
+    '/recipes/running-tasks/run-commands-executor',
+  '/recipes/tips-n-tricks/workspace-watching':
+    '/recipes/running-tasks/workspace-watching',
+  '/recipes/tips-n-tricks/reduce-repetitive-configuration':
+    '/recipes/running-tasks/reduce-repetitive-configuration',
+  '/concepts/more-concepts/global-nx':
+    '/getting-started/installation#installing-nx-globally',
+  '/concepts/more-concepts/nx-and-the-wrapper':
+    '/getting-started/installation#selfmanaged-nx-installation',
 };
 
 /*
@@ -895,11 +936,20 @@ const aiChat = {
 };
 
 // rename nx/linter to eslint
-// TODO(v17) invert these redirects
 const eslintRename = {
-  '/nx-api/eslint': '/nx-api/linter',
-  '/packages/eslint': '/packages/linter',
-  '/nx-api/eslint/executors/lint': '/nx-api/linter/executors/eslint',
+  '/nx-api/linter': '/nx-api/eslint',
+  '/nx-api/linter/documents': '/nx-api/eslint/documents',
+  '/nx-api/linter/documents/overview': '/nx-api/eslint/documents/overview',
+  '/nx-api/linter/executors': '/nx-api/eslint/executors',
+  '/nx-api/linter/executors/eslint': '/nx-api/eslint/executors/lint',
+  '/nx-api/linter/generators': '/nx-api/eslint/generators',
+  '/nx-api/linter/generators/convert-to-flat-config':
+    '/nx-api/eslint/generators/convert-to-flat-config',
+  '/nx-api/linter/generators/workspace-rule':
+    '/nx-api/eslint/generators/workspace-rule',
+  '/nx-api/linter/generators/workspace-rules-project':
+    '/nx-api/eslint/generators/workspace-rules-project',
+  '/packages/linter': '/packages/eslint',
 };
 
 /**
@@ -926,7 +976,7 @@ module.exports = {
   makeMoreConceptsSubmenu,
   pluginsToExtendNx,
   latestRecipesRefactoring,
-  coreFeatureRefactoring,
+  coreFeatureRefactoring: coreFeatureAndConceptsRefactoring,
   aiChat,
   eslintRename,
 };

@@ -26,13 +26,6 @@ import type { Tree } from '../tree';
 import minimatch = require('minimatch');
 
 export { readNxJson, updateNxJson } from './nx-json';
-export {
-  readWorkspaceConfiguration,
-  updateWorkspaceConfiguration,
-  isStandaloneProject,
-  getWorkspacePath,
-  WorkspaceConfiguration,
-} from './deprecated';
 
 /**
  * Adds project configuration to the Nx workspace.
@@ -214,22 +207,24 @@ function readAndCombineAllProjectConfigurations(tree: Tree): {
       const json = readJson(tree, projectFile);
       const config = buildProjectFromProjectJson(json, projectFile);
       mergeProjectConfigurationIntoRootMap(rootMap, config);
-    } else {
+    } else if (basename(projectFile) === 'package.json') {
       const packageJson = readJson<PackageJson>(tree, projectFile);
       const config = buildProjectConfigurationFromPackageJson(
         packageJson,
         projectFile,
         readNxJson(tree)
       );
-      mergeProjectConfigurationIntoRootMap(
-        rootMap,
-        // Inferred targets, tags, etc don't show up when running generators
-        // This is to help avoid running into issues when trying to update the workspace
-        {
-          name: config.name,
-          root: config.root,
-        }
-      );
+      if (!rootMap.has(config.root)) {
+        mergeProjectConfigurationIntoRootMap(
+          rootMap,
+          // Inferred targets, tags, etc don't show up when running generators
+          // This is to help avoid running into issues when trying to update the workspace
+          {
+            name: config.name,
+            root: config.root,
+          }
+        );
+      }
     }
   }
 

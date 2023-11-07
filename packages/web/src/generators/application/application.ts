@@ -6,7 +6,6 @@ import {
   generateFiles,
   GeneratorCallback,
   getPackageManagerCommand,
-  getWorkspaceLayout,
   joinPathFragments,
   names,
   offsetFromRoot,
@@ -27,6 +26,7 @@ import { join } from 'path';
 import { nxVersion, swcLoaderVersion } from '../../utils/versions';
 import { webInitGenerator } from '../init/init';
 import { Schema } from './schema';
+import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope';
 
 interface NormalizedSchema extends Schema {
   projectName: string;
@@ -281,16 +281,22 @@ export async function applicationGeneratorInternal(host: Tree, schema: Schema) {
   }
 
   if (options.e2eTestRunner === 'cypress') {
-    const { cypressProjectGenerator } = ensurePackage<
+    const { configurationGenerator } = ensurePackage<
       typeof import('@nx/cypress')
     >('@nx/cypress', nxVersion);
-    const cypressTask = await cypressProjectGenerator(host, {
+    addProjectConfiguration(host, options.e2eProjectName, {
+      root: options.e2eProjectRoot,
+      sourceRoot: joinPathFragments(options.e2eProjectRoot, 'src'),
+      projectType: 'application',
+      targets: {},
+      tags: [],
+      implicitDependencies: [options.projectName],
+    });
+    const cypressTask = await configurationGenerator(host, {
       ...options,
-      name: options.e2eProjectName,
-      directory: options.e2eProjectRoot,
-      // the name and root are already normalized, instruct the generator to use them as is
-      projectNameAndRootFormat: 'as-provided',
-      project: options.projectName,
+      project: options.e2eProjectName,
+      devServerTarget: `${options.projectName}:serve`,
+      directory: 'src',
       skipFormat: true,
     });
     tasks.push(cypressTask);
@@ -298,7 +304,6 @@ export async function applicationGeneratorInternal(host: Tree, schema: Schema) {
     const { configurationGenerator: playwrightConfigGenerator } = ensurePackage<
       typeof import('@nx/playwright')
     >('@nx/playwright', nxVersion);
-
     addProjectConfiguration(host, options.e2eProjectName, {
       root: options.e2eProjectRoot,
       sourceRoot: joinPathFragments(options.e2eProjectRoot, 'src'),
@@ -381,17 +386,16 @@ async function normalizeOptions(
     callingGenerator: '@nx/web:application',
   });
   options.projectNameAndRootFormat = projectNameAndRootFormat;
-
   const e2eProjectName = `${appProjectName}-e2e`;
   const e2eProjectRoot = `${appProjectRoot}-e2e`;
 
-  const { npmScope } = getWorkspaceLayout(host);
+  const npmScope = getNpmScope(host);
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
     : [];
 
-  if (options.bundler === 'vite' && !options.unitTestRunner) {
+  if (options.bundler === 'vite' && options.unitTestRunner !== 'none') {
     options.unitTestRunner = 'vitest';
   }
 

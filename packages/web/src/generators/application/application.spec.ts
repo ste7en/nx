@@ -86,6 +86,7 @@ describe('app', () => {
         {
           "compilerOptions": {
             "allowJs": true,
+            "module": "commonjs",
             "outDir": "../dist/out-tsc",
             "sourceMap": false,
             "types": [
@@ -95,9 +96,12 @@ describe('app', () => {
           },
           "extends": "../tsconfig.base.json",
           "include": [
-            "src/**/*.ts",
-            "src/**/*.js",
+            "**/*.ts",
+            "**/*.js",
             "cypress.config.ts",
+            "**/*.cy.ts",
+            "**/*.cy.js",
+            "**/*.d.ts",
           ],
         }
       `);
@@ -489,7 +493,6 @@ describe('app', () => {
     it('--bundler=none should use jest as the default', async () => {
       await applicationGenerator(tree, {
         name: 'my-cool-app',
-
         bundler: 'none',
         projectNameAndRootFormat: 'as-provided',
       });
@@ -507,7 +510,10 @@ describe('app', () => {
       ).toEqual('@nx/jest:jest');
     });
 
-    it('--bundler=vite --unitTestRunner=jest', async () => {
+    // Updated this test to match the way we do this for React
+    // When user chooses Vite as bundler and they choose to generate unit tests
+    // then use vitest
+    it('--bundler=vite --unitTestRunner=jest - still generate with vitest', async () => {
       await applicationGenerator(tree, {
         name: 'my-vite-app',
 
@@ -516,21 +522,24 @@ describe('app', () => {
         projectNameAndRootFormat: 'as-provided',
       });
       expect(tree.exists('my-vite-app/vite.config.ts')).toBeTruthy();
+      expect(tree.read('my-vite-app/vite.config.ts', 'utf-8')).toContain(
+        'test: {'
+      );
+      expect(tree.exists('my-vite-app/jest.config.ts')).toBeFalsy();
+    });
+
+    it('--bundler=vite --unitTestRunner=none', async () => {
+      await applicationGenerator(tree, {
+        name: 'my-vite-app',
+        bundler: 'vite',
+        unitTestRunner: 'none',
+        projectNameAndRootFormat: 'as-provided',
+      });
+      expect(tree.exists('my-vite-app/vite.config.ts')).toBeTruthy();
       expect(tree.read('my-vite-app/vite.config.ts', 'utf-8')).not.toContain(
         'test: {'
       );
-      expect(tree.exists('my-vite-app/jest.config.ts')).toBeTruthy();
-      expect(
-        readJson(tree, 'my-vite-app/tsconfig.spec.json').compilerOptions.types
-      ).toMatchInlineSnapshot(`
-        [
-          "jest",
-          "node",
-        ]
-      `);
-      expect(
-        readProjectConfiguration(tree, 'my-vite-app').targets.test.executor
-      ).toEqual('@nx/jest:jest');
+      expect(tree.exists('my-vite-app/tsconfig.spec.json')).toBeFalsy();
     });
 
     it('--bundler=webpack --unitTestRunner=vitest', async () => {
